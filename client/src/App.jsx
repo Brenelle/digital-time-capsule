@@ -4,11 +4,11 @@ import { Home } from './Pages/Home.jsx'
 import { Navbar } from './components/NavBar.jsx'
 import { Routes, Route } from 'react-router-dom';
 import { CreateCapsule } from './Pages/CreateCapsule.jsx';
-import { OpenCapsule } from './pages/OpenCapsule';
+import { OpenCapsule } from './Pages/OpenCapsule';
 import { MyCapsules } from './Pages/MyCapsules.jsx'
 import { About } from './Pages/About.jsx'
 import { Footer } from './components/Footer.jsx'
-import { SharedCapsule } from './pages/SharedCapsule';
+import { SharedCapsule } from './Pages/SharedCapsule';
 
 
 function App() {
