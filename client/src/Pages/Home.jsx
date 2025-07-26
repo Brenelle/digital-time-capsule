@@ -34,7 +34,7 @@ export const Home = () => {
           </div>
           <h1 className="text-5xl md:text-7xl font-bold mb-6">
             <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
-              Digital Time Capsule
+              Lock & Look
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
@@ -57,7 +57,7 @@ export const Home = () => {
 
         {/* Floating Icons */}
         <div className="absolute top-20 left-10 opacity-20">
-          <Heart className="w-16 h-16 text-pink-400 animate-pulse" />
+          <Clock className="w-16 h-16 text-pink-400 animate-pulse" />
         </div>
         <div className="absolute bottom-20 right-10 opacity-20">
           <MessageCircle className="w-20 h-20 text-purple-400 animate-bounce" />
