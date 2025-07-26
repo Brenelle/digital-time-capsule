@@ -1,4 +1,6 @@
+import React from "react";
 import { useState } from 'react'
+import { Home } from './Pages/Home.jsx'
 
 
 function App() {
@@ -6,7 +8,7 @@ function App() {
 
   return (
     <>
-
+    <Home/>
     </>
   )
 }
