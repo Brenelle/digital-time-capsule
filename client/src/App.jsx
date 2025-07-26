@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Home } from './Pages/Home.jsx'
 import { Navbar } from './components/NavBar.jsx'
 import { Routes, Route } from 'react-router-dom';
+import { CreateCapsule } from './Pages/CreateCapsule.jsx';
 
 
 function App() {
@@ -13,8 +14,10 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/create" element={<CreateCapsule/>} />
       </Routes>
-      <Home/>
+      
+      
       
     </>
   )
