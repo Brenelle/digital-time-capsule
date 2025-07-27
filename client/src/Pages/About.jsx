@@ -80,7 +80,7 @@ export const About = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
+      
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="flex justify-center mb-8">
@@ -98,7 +98,7 @@ export const About = () => {
         </div>
       </section>
 
-      {/* How It Works */}
+      
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -129,7 +129,7 @@ export const About = () => {
         </div>
       </section>
 
-      {/* Features */}
+      
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -158,7 +158,7 @@ export const About = () => {
         </div>
       </section>
 
-      {/* Use Cases */}
+      
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -172,8 +172,7 @@ export const About = () => {
             {useCases.map((useCase, index) => (
               <div
                 key={index}
-                className="p-6 bg-white/80 backdrop-blur-sm rounded-xl border border-purple-100 hover:border-purple-300 transition-all duration-200"
-              >
+                className="p-6 bg-white/80 backdrop-blur-sm rounded-xl border border-purple-100 hover:border-purple-300 transition-all duration-200">
                 <div className="flex items-center mb-4">
                   <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white mr-3">
                     {useCase.icon}
@@ -187,7 +186,7 @@ export const About = () => {
         </div>
       </section>
 
-      {/* Call To Action */}
+      
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-gray-800 mb-6">Start Your Journey Through Time</h2>
