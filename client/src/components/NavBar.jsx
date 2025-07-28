@@ -30,7 +30,7 @@ export const Navbar = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-10">
+          <div className="hidden md:flex items-center space-x-6">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
@@ -44,6 +44,11 @@ export const Navbar = () => {
                 {link.label}
               </Link>
             ))}
+            <Link to="/register">
+              <button className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:opacity-90">
+                Register
+              </button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -75,6 +80,11 @@ export const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
+              <Link to="/register" onClick={() => setIsOpen(false)}>
+                <button className="w-full text-left px-4 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:opacity-90">
+                  Register
+                </button>
+              </Link>
             </div>
           </div>
         )}

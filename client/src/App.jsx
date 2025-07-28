@@ -9,6 +9,10 @@ import { MyCapsules } from './Pages/MyCapsules.jsx'
 import { About } from './Pages/About.jsx'
 import { Footer } from './components/Footer.jsx'
 import { SharedCapsule } from './Pages/SharedCapsule';
+import  Login from './Pages/Login.jsx';
+import Register from './Pages/Register.jsx';
+
+
 
 
 
@@ -25,6 +29,8 @@ function App() {
         <Route path="/my-capsules" element={<MyCapsules/>} />
         <Route path="/about" element={<About/>} />
         <Route path="/shared/:id" element={<SharedCapsule />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
       <Footer/>
       
