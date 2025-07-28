@@ -11,6 +11,7 @@ import { Footer } from './components/Footer.jsx'
 import { SharedCapsule } from './Pages/SharedCapsule';
 
 
+
 function App() {
   const [count, setCount] = useState(0)
 
