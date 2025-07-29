@@ -1,8 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { Upload, Calendar, Lock, Eye, EyeOff, ExternalLink } from 'lucide-react';
 import { Button } from '../components/Button';
-import ApiService from '../services/api';
 import FileUpload from '../components/FileUpload';
+import { db, storage, auth } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export const CreateCapsule = () => {
   const [formData, setFormData] = useState({
@@ -23,12 +26,38 @@ export const CreateCapsule = () => {
     setError('');
 
     try {
-      const response = await ApiService.createCapsule({
+      let userId = null;
+      let mediaUrl = null;
+
+      // 🔐 Get currently signed-in user
+      await new Promise((resolve, reject) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+          unsubscribe();
+          if (user) {
+            userId = user.uid;
+            resolve();
+          } else {
+            reject(new Error('You must be logged in to create a capsule.'));
+          }
+        });
+      });
+
+      // 🖼 Upload media to Firebase Storage if it exists
+      if (mediaFile) {
+        const storageRef = ref(storage, `capsules/${userId}/${Date.now()}_${mediaFile.name}`);
+        const snapshot = await uploadBytes(storageRef, mediaFile);
+        mediaUrl = await getDownloadURL(snapshot.ref);
+      }
+
+      // 📦 Save capsule to Firestore
+      await addDoc(collection(db, 'capsules'), {
+        userId,
         title: formData.title,
         message: formData.message,
         unlockDate: formData.unlockDate,
         visibility: formData.visibility,
-        mediaUrl: mediaFile || null, // Adjust this if you need actual upload logic
+        mediaUrl: mediaUrl || null,
+        createdAt: serverTimestamp(),
       });
 
       alert('Time capsule created successfully! 🎉');
@@ -56,7 +85,7 @@ export const CreateCapsule = () => {
     });
     setMediaFile(null);
     if (fileUploadRef.current) {
-      fileUploadRef.current.reset(); // Assumes you implement reset in FileUpload
+      fileUploadRef.current.reset();
     }
   };
 

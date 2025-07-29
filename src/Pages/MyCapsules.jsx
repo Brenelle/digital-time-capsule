@@ -9,7 +9,7 @@ export const MyCapsules = () => {
   const [capsules, setCapsules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all'); // all, locked, unlocked
+  const [filterStatus, setFilterStatus] = useState('all');
   const [error, setError] = useState('');
   const [stats, setStats] = useState({ total: 0, unlocked: 0, locked: 0 });
 
@@ -18,33 +18,58 @@ export const MyCapsules = () => {
       setLoading(true);
       setError('');
 
+      const user = auth.currentUser;
+
+      if (!user) {
+        setError('You must be logged in');
+        setCapsules([]);
+        setLoading(false);
+        return;
+      }
+
       try {
-        const data = await ApiService.getUserCapsules();
-        setCapsules(data.capsules || []);
+        const q = query(
+          collection(db, 'capsules'),
+          where('userId', '==', user.uid)
+        );
+
+        const querySnapshot = await getDocs(q);
+        const capsulesData = [];
+        let unlocked = 0;
+        let locked = 0;
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.isUnlocked) unlocked++;
+          else locked++;
+          capsulesData.push({ id: doc.id, ...data });
+        });
+
+        setCapsules(capsulesData);
         setStats({
-          total: data.total || 0,
-          unlocked: data.unlocked || 0,
-          locked: data.locked || 0
+          total: capsulesData.length,
+          unlocked,
+          locked,
         });
       } catch (error) {
-        console.error('Error fetching capsules:', error);
-        setError(error.message || 'Failed to load your capsules');
-        setCapsules([]);
+        console.error('Error fetching from Firestore:', error);
+        setError('Failed to fetch capsules');
       } finally {
         setLoading(false);
       }
     };
 
+    // ✅ Only run once after initial mount
     fetchCapsules();
   }, []);
 
   const filteredCapsules = capsules.filter(capsule => {
     const matchesSearch = capsule.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         capsule.message.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesFilter = filterStatus === 'all' || 
-                         (filterStatus === 'locked' && !capsule.isUnlocked) ||
-                         (filterStatus === 'unlocked' && capsule.isUnlocked);
+      capsule.message.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesFilter = filterStatus === 'all' ||
+      (filterStatus === 'locked' && !capsule.isUnlocked) ||
+      (filterStatus === 'unlocked' && capsule.isUnlocked);
 
     return matchesSearch && matchesFilter;
   });
@@ -165,7 +190,7 @@ export const MyCapsules = () => {
               {searchTerm ? 'No capsules found' : 'No time capsules yet'}
             </h3>
             <p className="text-gray-500 mb-8 max-w-md mx-auto">
-              {searchTerm 
+              {searchTerm
                 ? 'Try adjusting your search terms or filters'
                 : 'Create your first time capsule to start preserving memories for the future'
               }
