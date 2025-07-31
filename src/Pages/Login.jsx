@@ -9,14 +9,15 @@ const Login = () => {
   const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [firebaseError, setFirebaseError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setFirebaseError('');
+    setSuccessMessage('');
 
     if (!email || !password) {
-      // If fields are empty, mark as touched to show validation messages
       setEmailTouched(true);
       setPasswordTouched(true);
       return;
@@ -24,9 +25,24 @@ const Login = () => {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate('/');
+      setSuccessMessage('You have successfully logged in!');
+      setTimeout(() => navigate('/'), 2000);
     } catch (err) {
-      setFirebaseError(err.message);
+      // Check error codes and display custom messages
+      switch (err.code) {
+        case 'auth/user-not-found':
+          setFirebaseError('No user found with this email address.');
+          break;
+        case 'auth/wrong-password':
+          setFirebaseError('Incorrect password. Please try again.');
+          break;
+        case 'auth/invalid-email':
+          setFirebaseError('The email address format is invalid.');
+          break;
+        default:
+          setFirebaseError('Unable to log in. Please check your credentials.');
+          break;
+      }
     }
   };
 
@@ -37,6 +53,11 @@ const Login = () => {
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
       <div className="w-full max-w-sm p-6 bg-white rounded-xl shadow-md">
+        {successMessage && (
+          <div className="mb-4 text-green-600 font-semibold text-center">
+            {successMessage}
+          </div>
+        )}
         <h1 className="text-2xl font-bold text-center mb-6">Login</h1>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
