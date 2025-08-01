@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Clock, Menu, X } from 'lucide-react';
+import { signOut } from 'firebase/auth';
+import { auth } from '../Firebase';
+import { useAuth } from '../context/AuthContext'; 
+import { toast } from 'react-hot-toast';
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { currentUser } = useAuth(); 
 
   const navLinks = [
     { path: '/', label: 'Home' },
@@ -14,6 +19,16 @@ export const Navbar = () => {
   ];
 
   const isActive = (path) => location.pathname === path;
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast.success('Logged out successfully!');
+    } catch (error) {
+      toast.error('Failed to logout');
+      console.error(error);
+    }
+  };
 
   return (
     <nav className="bg-white/80 backdrop-blur-md border-b border-purple-100 sticky top-0 z-50">
@@ -44,11 +59,21 @@ export const Navbar = () => {
                 {link.label}
               </Link>
             ))}
-            <Link to="/register">
-              <button className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:opacity-90">
-                Register
+
+            {currentUser ? (
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:opacity-90"
+              >
+                Logout
               </button>
-            </Link>
+            ) : (
+              <Link to="/register">
+                <button className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:opacity-90">
+                  Register
+                </button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -80,11 +105,24 @@ export const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-              <Link to="/register" onClick={() => setIsOpen(false)}>
-                <button className="w-full text-left px-4 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:opacity-90">
-                  Register
+
+              {currentUser ? (
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:opacity-90"
+                >
+                  Logout
                 </button>
-              </Link>
+              ) : (
+                <Link to="/register" onClick={() => setIsOpen(false)}>
+                  <button className="w-full text-left px-4 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:opacity-90">
+                    Register
+                  </button>
+                </Link>
+              )}
             </div>
           </div>
         )}
