@@ -14,19 +14,22 @@ const CapsuleCard = ({
   onShare,
 }) => {
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    const date = new Date(dateString);
+    if (isNaN(date)) return 'Invalid Date';
+    return date.toLocaleDateString('en-IN', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
   const getDaysUntilUnlock = () => {
-    const today = new Date();
+    const now = new Date();
     const unlockDateTime = new Date(unlockDate);
-    const diffTime = unlockDateTime.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    const diff = unlockDateTime.getTime() - now.getTime();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
   };
 
   const daysUntilUnlock = getDaysUntilUnlock();
@@ -44,17 +47,17 @@ const CapsuleCard = ({
     }
   };
 
+  const canOpen = isUnlocked || daysUntilUnlock <= 0;
+
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-purple-100">
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
           <h3 className="text-xl font-semibold text-gray-800 line-clamp-1">{title}</h3>
           <div className="flex items-center space-x-2">
-            <div className="flex items-center text-sm text-gray-500">
-              {getVisibilityIcon()}
-            </div>
-            <div className={`p-2 rounded-full ${isUnlocked ? 'bg-green-100' : 'bg-orange-100'}`}>
-              {isUnlocked ? (
+            <div className="flex items-center text-sm text-gray-500">{getVisibilityIcon()}</div>
+            <div className={`p-2 rounded-full ${canOpen ? 'bg-green-100' : 'bg-orange-100'}`}>
+              {canOpen ? (
                 <Unlock className="w-4 h-4 text-green-600" />
               ) : (
                 <Lock className="w-4 h-4 text-orange-600" />
@@ -64,13 +67,13 @@ const CapsuleCard = ({
         </div>
 
         <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-          {isUnlocked ? message : `This capsule will unlock on ${formatDate(unlockDate)}`}
+          {canOpen ? message : `This capsule will unlock on ${formatDate(unlockDate)}`}
         </p>
 
         <div className="flex items-center text-sm text-gray-500 mb-4">
           <Calendar className="w-4 h-4 mr-2" />
           <span>
-            {isUnlocked
+            {canOpen
               ? `Unlocked on ${formatDate(unlockDate)}`
               : daysUntilUnlock > 0
               ? `${daysUntilUnlock} days remaining`
@@ -79,9 +82,7 @@ const CapsuleCard = ({
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">
-            Created {formatDate(createdAt)}
-          </span>
+          <span className="text-xs text-gray-400">Created {formatDate(createdAt)}</span>
           <div className="flex space-x-2">
             {visibility === 'shareable' && onShare && (
               <Button variant="outline" size="sm" onClick={onShare}>
@@ -89,12 +90,12 @@ const CapsuleCard = ({
               </Button>
             )}
             <Button
-              variant={isUnlocked || daysUntilUnlock <= 0 ? 'primary' : 'outline'}
+              variant={canOpen ? 'primary' : 'outline'}
               size="sm"
               onClick={onOpen}
-              disabled={!isUnlocked && daysUntilUnlock > 0}
+              disabled={!canOpen}
             >
-              {isUnlocked || daysUntilUnlock <= 0 ? 'Open' : 'Locked'}
+              {canOpen ? 'Open' : 'Locked'}
             </Button>
           </div>
         </div>

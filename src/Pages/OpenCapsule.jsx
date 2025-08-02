@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Calendar, Lock, Unlock, Heart, MessageCircle, Clock } from 'lucide-react';
+import { Calendar, Lock, Unlock, Heart, MessageCircle, Clock, Download } from 'lucide-react';
 import { Button } from '../components/Button';
 import ApiService from '../services/api';
 
@@ -69,6 +69,13 @@ export const OpenCapsule = () => {
       month: 'long',
       day: 'numeric',
     });
+  };
+
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = capsule.mediaUrl;
+    link.download = capsule.mediaName || 'capsule-file';
+    link.click();
   };
 
   if (loading) {
@@ -179,6 +186,21 @@ export const OpenCapsule = () => {
                 <MessageCircle className="w-8 h-8 text-purple-500 mb-4" />
                 <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">{capsule.message}</div>
               </div>
+
+              {capsule.mediaUrl && (
+                <div className="mt-8 text-center">
+                  <p className="text-gray-700 font-medium mb-2">Attached Media:</p>
+                  <img
+                    src={capsule.mediaUrl}
+                    alt="Capsule Media"
+                    className="mx-auto rounded-lg shadow-md max-w-xs"
+                  />
+
+                  <Button variant="secondary" className="mt-4" onClick={handleDownload}>
+                    <Download className="w-5 h-5 mr-2" /> Save to Device
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="mt-8 flex justify-center space-x-4">
@@ -197,5 +219,3 @@ export const OpenCapsule = () => {
     </div>
   );
 };
-
-

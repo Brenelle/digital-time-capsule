@@ -6,15 +6,17 @@ import { db, storage, auth } from '../Firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { onAuthStateChanged } from 'firebase/auth';
+import { v4 as uuidv4 } from 'uuid';
 
 export const CreateCapsule = () => {
   const [formData, setFormData] = useState({
     title: '',
     message: '',
     unlockDate: '',
+    unlockTime: '',
     visibility: 'private',
-    hasMedia: false,
   });
+
   const [mediaFile, setMediaFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -28,8 +30,8 @@ export const CreateCapsule = () => {
     try {
       let userId = null;
       let mediaUrl = null;
-
-      
+      const unlockDateTime = new Date(`${formData.unlockDate}T${formData.unlockTime}`);
+      // Wait for auth
       await new Promise((resolve, reject) => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
           unsubscribe();
@@ -42,28 +44,30 @@ export const CreateCapsule = () => {
         });
       });
 
+      // Upload media file if it exists
       if (mediaFile) {
-        const storageRef = ref(storage, `capsules/${userId}/${Date.now()}_${mediaFile.name}`);
-        const snapshot = await uploadBytes(storageRef, mediaFile);
+        const fileRef = ref(storage, `capsules/${userId}/${uuidv4()}_${mediaFile.name}`);
+        const snapshot = await uploadBytes(fileRef, mediaFile);
         mediaUrl = await getDownloadURL(snapshot.ref);
       }
 
-      
+      // Create capsule
       await addDoc(collection(db, 'capsules'), {
         userId,
         title: formData.title,
         message: formData.message,
-        unlockDate: formData.unlockDate,
+        unlockDate: unlockDateTime,
         visibility: formData.visibility,
         mediaUrl: mediaUrl || null,
         createdAt: serverTimestamp(),
+        isUnlocked: false,
       });
 
       alert('Time capsule created successfully! 🎉');
-      handleCancel(); 
-    } catch (error) {
-      console.error('Error creating capsule:', error);
-      setError(error.message || 'Failed to create time capsule. Please try again.');
+      handleCancel();
+    } catch (err) {
+      console.error('Capsule creation failed:', err);
+      setError(err.message || 'Something went wrong.');
     } finally {
       setIsSubmitting(false);
     }
@@ -71,7 +75,7 @@ export const CreateCapsule = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCancel = () => {
@@ -79,13 +83,11 @@ export const CreateCapsule = () => {
       title: '',
       message: '',
       unlockDate: '',
+      unlockTime: '',
       visibility: 'private',
-      hasMedia: false,
     });
     setMediaFile(null);
-    if (fileUploadRef.current) {
-      fileUploadRef.current.reset();
-    }
+    fileUploadRef.current?.reset?.(); // fallback for custom ref reset
   };
 
   const getMinDate = () => {
@@ -153,7 +155,15 @@ export const CreateCapsule = () => {
           {/* File Upload */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">Add Media (Optional)</label>
-            <FileUpload ref={fileUploadRef} onUpload={(file) => setMediaFile(file)} />
+            <FileUpload
+              ref={fileUploadRef}
+              onFileSelect={(file) => setMediaFile(file)}
+              selectedFile={mediaFile}
+              onFileRemove={() => {
+                setMediaFile(null);
+                if (fileUploadRef.current?.reset) fileUploadRef.current.reset();
+              }}
+            />
           </div>
 
           {/* Unlock Date */}
@@ -174,6 +184,21 @@ export const CreateCapsule = () => {
             />
             <p className="text-sm text-gray-500 mt-1">Choose when this capsule should be unlocked</p>
           </div>
+          <div className="mb-6">
+            <label htmlFor="unlockTime" className="block text-sm font-medium text-gray-700 mb-2">
+              Unlock Time (24hr)
+            </label>
+            <input
+              type="time"
+              id="unlockTime"
+              name="unlockTime"
+              value={formData.unlockTime}
+              onChange={handleInputChange}
+              required
+              className="w-full px-4 py-3 border border-purple-200 rounded-lg focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200"
+            />
+            <p className="text-sm text-gray-500 mt-1">What time should this capsule unlock?</p>
+          </div>
 
           {/* Visibility */}
           <div className="mb-8">
@@ -183,9 +208,24 @@ export const CreateCapsule = () => {
             </label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { value: 'private', label: 'Private', description: 'Only you can see this capsule', icon: <EyeOff className="w-5 h-5" /> },
-                { value: 'public', label: 'Public', description: 'Anyone can discover this capsule', icon: <Eye className="w-5 h-5" /> },
-                { value: 'shareable', label: 'Shareable Link', description: 'Share with specific people via link', icon: <ExternalLink className="w-5 h-5" /> },
+                {
+                  value: 'private',
+                  label: 'Private',
+                  description: 'Only you can see this capsule',
+                  icon: <EyeOff className="w-5 h-5" />,
+                },
+                {
+                  value: 'public',
+                  label: 'Public',
+                  description: 'Anyone can discover this capsule',
+                  icon: <Eye className="w-5 h-5" />,
+                },
+                {
+                  value: 'shareable',
+                  label: 'Shareable Link',
+                  description: 'Share with specific people via link',
+                  icon: <ExternalLink className="w-5 h-5" />,
+                },
               ].map((option) => (
                 <div key={option.value} className="relative">
                   <input
@@ -199,14 +239,16 @@ export const CreateCapsule = () => {
                   />
                   <label
                     htmlFor={option.value}
-                    className={`block p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
-                      formData.visibility === option.value
+                    className={`block p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${formData.visibility === option.value
                         ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-500/20'
                         : 'border-purple-200 hover:border-purple-300 hover:bg-purple-50/50'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center space-x-3 mb-2">
-                      <div className={`${formData.visibility === option.value ? 'text-purple-600' : 'text-gray-500'}`}>
+                      <div
+                        className={`${formData.visibility === option.value ? 'text-purple-600' : 'text-gray-500'
+                          }`}
+                      >
                         {option.icon}
                       </div>
                       <span className="font-medium text-gray-900">{option.label}</span>
