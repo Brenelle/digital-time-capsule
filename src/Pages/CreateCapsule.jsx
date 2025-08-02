@@ -29,7 +29,7 @@ export const CreateCapsule = () => {
       let userId = null;
       let mediaUrl = null;
 
-      // 🔐 Get currently signed-in user
+      
       await new Promise((resolve, reject) => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
           unsubscribe();
@@ -42,14 +42,13 @@ export const CreateCapsule = () => {
         });
       });
 
-      // 🖼 Upload media to Firebase Storage if it exists
       if (mediaFile) {
         const storageRef = ref(storage, `capsules/${userId}/${Date.now()}_${mediaFile.name}`);
         const snapshot = await uploadBytes(storageRef, mediaFile);
         mediaUrl = await getDownloadURL(snapshot.ref);
       }
 
-      // 📦 Save capsule to Firestore
+      
       await addDoc(collection(db, 'capsules'), {
         userId,
         title: formData.title,
@@ -61,7 +60,7 @@ export const CreateCapsule = () => {
       });
 
       alert('Time capsule created successfully! 🎉');
-      handleCancel(); // Reset after success
+      handleCancel(); 
     } catch (error) {
       console.error('Error creating capsule:', error);
       setError(error.message || 'Failed to create time capsule. Please try again.');
