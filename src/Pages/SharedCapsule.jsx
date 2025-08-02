@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Calendar, Lock, Unlock, Heart, MessageCircle, Clock, Share2, Eye } from 'lucide-react';
 import { Button } from '../components/Button';
-import ApiService from '../services/api';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../Firebase';
 
 export const SharedCapsule = () => {
   const { id: slug } = useParams();
@@ -23,11 +24,28 @@ export const SharedCapsule = () => {
       setError('');
 
       try {
-        const data = await ApiService.getSharedCapsule(slug);
-        setCapsule(data);
+        const docRef = doc(db, 'capsules', slug);
+        const snapshot = await getDoc(docRef);
+
+        if (!snapshot.exists()) {
+          setError('Capsule not found or was removed');
+          return;
+        }
+
+        const data = snapshot.data();
+
+        // Compute unlocked state
+        const currentTime = new Date();
+        const unlockTime = new Date(data.unlockDate);
+        const isUnlocked = currentTime >= unlockTime;
+
+        setCapsule({
+          ...data,
+          isUnlocked,
+        });
       } catch (error) {
-        console.error('Error fetching shared capsule:', error);
-        setError(error.message || 'Failed to load shared time capsule');
+        console.error('Error fetching capsule:', error);
+        setError(error.message || 'Failed to load capsule');
       } finally {
         setLoading(false);
       }
@@ -58,7 +76,6 @@ export const SharedCapsule = () => {
 
       updateTimeRemaining();
       const interval = setInterval(updateTimeRemaining, 1000);
-
       return () => clearInterval(interval);
     }
   }, [capsule]);
@@ -88,6 +105,7 @@ export const SharedCapsule = () => {
       alert('Link copied to clipboard!');
     }
   };
+
 
   if (loading) {
     return (
@@ -223,27 +241,44 @@ export const SharedCapsule = () => {
                   {capsule.message}
                 </div>
               </div>
+              {capsule?.media && (
+                <div className="my-6 flex justify-center">
+                  {capsule.media.endsWith('.mp4') || capsule.media.includes('video') ? (
+                    <video
+                      controls
+                      className="w-full max-w-xl rounded-xl shadow"
+                      src={capsule.media}
+                    />
+                  ) : (
+                    <img
+                      src={capsule.media}
+                      alt="Capsule Media"
+                      className="w-full max-w-xl rounded-xl shadow"
+                    />
+                  )}
+                </div>
+              )}
             </div>
+          </div>
 
-            <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center text-blue-800 mb-2">
-                <Eye className="w-4 h-4 mr-2" />
-                <span className="font-semibold">You're viewing a shared time capsule</span>
-              </div>
-              <p className="text-blue-700 text-sm">
-                This memory was shared with you by {capsule.sharedBy}. You can share this link with others too!
-              </p>
+          <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center text-blue-800 mb-2">
+              <Eye className="w-4 h-4 mr-2" />
+              <span className="font-semibold">You're viewing a shared time capsule</span>
             </div>
+            <p className="text-blue-700 text-sm">
+              This memory was shared with you by {capsule.sharedBy}. You can share this link with others too!
+            </p>
+          </div>
 
-            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-              <Button variant="outline" onClick={() => window.location.href = '/'}>
-                Create Your Own
-              </Button>
-              <Button variant="primary" onClick={handleShare}>
-                <Share2 className="w-4 h-4 mr-2" />
-                Share This Capsule
-              </Button>
-            </div>
+          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+            <Button variant="outline" onClick={() => window.location.href = '/'}>
+              Create Your Own
+            </Button>
+            <Button variant="primary" onClick={handleShare}>
+              <Share2 className="w-4 h-4 mr-2" />
+              Share This Capsule
+            </Button>
           </div>
         </div>
       </div>

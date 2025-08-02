@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Upload, Calendar, Lock, Eye, EyeOff, ExternalLink } from 'lucide-react';
 import { Button } from '../components/Button';
 import FileUpload from '../components/FileUpload';
-import { db, storage, auth } from '../firebase';
+import { db, storage, auth } from '../Firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { onAuthStateChanged } from 'firebase/auth';
