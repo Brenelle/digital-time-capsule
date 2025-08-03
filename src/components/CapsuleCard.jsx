@@ -13,15 +13,27 @@ const CapsuleCard = ({
   onOpen,
   onShare,
 }) => {
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
+  const formatDate = (dateInput) => {
+    if (!dateInput) return 'Invalid Date';
+
+    let date;
+
+    // If Firestore Timestamp (has toDate method)
+    if (typeof dateInput.toDate === 'function') {
+      date = dateInput.toDate();
+    } else {
+      date = new Date(dateInput);
+    }
+
     if (isNaN(date)) return 'Invalid Date';
-    return date.toLocaleDateString('en-IN', {
+
+    return date.toLocaleString('en-IN', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+      hour12: true,
     });
   };
 
@@ -76,8 +88,8 @@ const CapsuleCard = ({
             {canOpen
               ? `Unlocked on ${formatDate(unlockDate)}`
               : daysUntilUnlock > 0
-              ? `${daysUntilUnlock} days remaining`
-              : 'Ready to unlock!'}
+                ? `${daysUntilUnlock} days remaining`
+                : 'Ready to unlock!'}
           </span>
         </div>
 

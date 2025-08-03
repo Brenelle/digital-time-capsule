@@ -6,6 +6,7 @@ import { Button } from '../components/Button';
 import { getDocs, collection, query, where, limit } from 'firebase/firestore';
 import { auth, db } from '../Firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import toast, { Toaster } from 'react-hot-toast';
 
 export const MyCapsules = () => {
   const [capsules, setCapsules] = useState([]);
@@ -49,10 +50,14 @@ export const MyCapsules = () => {
         if (data.isUnlocked) unlocked++;
         else locked++;
 
-        // Ensure unlockDate is valid ISO string
+        // Combine unlockDate and unlockTime safely
         let parsedDate = '';
         try {
-          parsedDate = new Date(data.unlockDate).toISOString();
+          const dateStr = data.unlockDate || '';
+          const timeStr = data.unlockTime || '00:00';
+          const isoString = `${dateStr}T${timeStr}`;
+          const parsed = new Date(isoString);
+          parsedDate = isNaN(parsed.getTime()) ? '' : parsed.toISOString();
         } catch {
           parsedDate = '';
         }
@@ -69,6 +74,7 @@ export const MyCapsules = () => {
     } catch (error) {
       console.error('Error fetching from Firestore:', error);
       setError('Failed to fetch capsules');
+      toast.error('Failed to fetch capsules');
     } finally {
       setLoading(false);
     }
@@ -96,9 +102,9 @@ export const MyCapsules = () => {
     if (capsule?.slug) {
       const shareUrl = `${window.location.origin}/shared/${capsule.slug}`;
       navigator.clipboard.writeText(shareUrl);
-      alert('Share link copied to clipboard!');
+      toast.success('Share link copied to clipboard!');
     } else {
-      alert('This capsule cannot be shared');
+      toast.error('This capsule cannot be shared');
     }
   };
 
@@ -121,6 +127,7 @@ export const MyCapsules = () => {
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -227,6 +234,7 @@ export const MyCapsules = () => {
                 message={capsule.message}
                 isUnlocked={capsule.isUnlocked}
                 unlockDate={capsule.unlockDate}
+                createdAt={capsule.createdAt}
                 onOpen={() => handleOpenCapsule(capsule.id)}
                 onShare={
                   capsule.visibility === 'shareable'
