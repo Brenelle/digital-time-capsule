@@ -187,31 +187,6 @@ export const OpenCapsule = () => {
                 <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">{capsule.message}</div>
               </div>
 
-              {capsule.mediaUrl && (
-                <div className="mt-8 text-center">
-                  <p className="text-gray-700 font-medium mb-2">Attached Media:</p>
-                  <img
-                    src={capsule.mediaUrl}
-                    alt="Capsule Media"
-                    className="mx-auto rounded-lg shadow-md max-w-xs"
-                  />
-
-                  <Button variant="secondary" className="mt-4" onClick={handleDownload}>
-                    <Download className="w-5 h-5 mr-2" /> Save to Device
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            <div className="mt-8 flex justify-center space-x-4">
-              <Button variant="outline" onClick={() => window.history.back()}>Back to Capsules</Button>
-              <Button variant="primary" onClick={() => navigator.share && navigator.share({
-                title: capsule.title,
-                text: 'Check out this time capsule message!',
-                url: window.location.href,
-              })}>
-                Share Memory
-              </Button>
             </div>
           </div>
         </div>

@@ -3,10 +3,16 @@ import { Plus, Search, Filter, Calendar, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import CapsuleCard from '../components/CapsuleCard';
 import { Button } from '../components/Button';
-import { getDocs, collection, query, where, limit } from 'firebase/firestore';
-import { auth, db } from '../Firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import toast, { Toaster } from 'react-hot-toast';
+import {
+  collection,
+  getDocs,
+  limit,
+  query,
+  where
+} from 'firebase/firestore';
+import { auth, db } from '../Firebase';
+import { toast, Toaster } from 'sonner';
 
 export const MyCapsules = () => {
   const [capsules, setCapsules] = useState([]);
@@ -50,14 +56,13 @@ export const MyCapsules = () => {
         if (data.isUnlocked) unlocked++;
         else locked++;
 
-        // Combine unlockDate and unlockTime safely
         let parsedDate = '';
         try {
-          const dateStr = data.unlockDate || '';
-          const timeStr = data.unlockTime || '00:00';
-          const isoString = `${dateStr}T${timeStr}`;
-          const parsed = new Date(isoString);
-          parsedDate = isNaN(parsed.getTime()) ? '' : parsed.toISOString();
+          if (data.unlockDate?.seconds) {
+            parsedDate = new Date(data.unlockDate.seconds * 1000).toISOString();
+          } else {
+            parsedDate = '';
+          }
         } catch {
           parsedDate = '';
         }
@@ -97,132 +102,77 @@ export const MyCapsules = () => {
     window.location.href = `/capsule/${capsuleId}`;
   };
 
-  const handleShareCapsule = (capsuleId) => {
-    const capsule = capsules.find((c) => c.id === capsuleId);
-    if (capsule?.slug) {
-      const shareUrl = `${window.location.origin}/shared/${capsule.slug}`;
-      navigator.clipboard.writeText(shareUrl);
-      toast.success('Share link copied to clipboard!');
-    } else {
-      toast.error('This capsule cannot be shared');
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-64 mb-8"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, index) => (
-                <div key={index} className="bg-gray-200 rounded-2xl h-64"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">My Time Capsules</h1>
-            <p className="text-xl text-gray-600">Preserve your memories for the future</p>
-          </div>
-          <Link to="/create" className="mt-4 md:mt-0">
-            <Button variant="primary" className="w-full md:w-auto">
-              <Plus className="w-5 h-5 mr-2" />
-              New Capsule
+        <div className="flex justify-between items-center mb-10">
+          <h1 className="text-3xl font-bold text-gray-800">My Capsules</h1>
+          <Link to="/create">
+            <Button className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Create New
             </Button>
           </Link>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-purple-100 text-center">
-            <div className="text-3xl font-bold text-purple-600 mb-2">{stats.total}</div>
-            <div className="text-gray-600 flex items-center justify-center">
-              <Clock className="w-4 h-4 mr-1" />
-              Total Capsules
-            </div>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by title or message..."
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-green-100 text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">{stats.unlocked}</div>
-            <div className="text-gray-600 flex items-center justify-center">
-              <Calendar className="w-4 h-4 mr-1" />
-              Unlocked
-            </div>
-          </div>
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-orange-100 text-center">
-            <div className="text-3xl font-bold text-orange-600 mb-2">{stats.locked}</div>
-            <div className="text-gray-600 flex items-center justify-center">
-              <Clock className="w-4 h-4 mr-1" />
-              Waiting to Unlock
-            </div>
-          </div>
-        </div>
-
-        {/* Search and Filter */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-purple-100">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search your capsules..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-purple-200 rounded-lg focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200"
-              />
-            </div>
-            <div className="relative">
-              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="pl-10 pr-8 py-3 border border-purple-200 rounded-lg focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 bg-white"
-              >
-                <option value="all">All Capsules</option>
-                <option value="unlocked">Unlocked</option>
-                <option value="locked">Locked</option>
-              </select>
-            </div>
+          <div className="flex items-center gap-2">
+            <Filter className="h-5 w-5 text-gray-500" />
+            <select
+              className="border border-gray-300 rounded-md px-2 py-1"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">All</option>
+              <option value="locked">Locked</option>
+              <option value="unlocked">Unlocked</option>
+            </select>
           </div>
         </div>
 
-        {/* Error message */}
+        <div className="flex gap-6 mb-10 text-sm md:text-base">
+          <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg">
+            <Calendar className="w-4 h-4 text-gray-600" />
+            <span>Total: {stats.total}</span>
+          </div>
+          <div className="flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-lg">
+            <Clock className="w-4 h-4" />
+            <span>Unlocked: {stats.unlocked}</span>
+          </div>
+          <div className="flex items-center gap-2 bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg">
+            <Clock className="w-4 h-4" />
+            <span>Locked: {stats.locked}</span>
+          </div>
+        </div>
+
         {error && (
           <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-600 text-center">{error}</p>
           </div>
         )}
 
-        {/* Capsules Grid */}
         {filteredCapsules.length === 0 ? (
           <div className="text-center py-16">
-            <Clock className="w-24 h-24 text-gray-300 mx-auto mb-6" />
-            <h3 className="text-2xl font-semibold text-gray-700 mb-2">
-              {searchTerm ? 'No capsules found' : 'No time capsules yet'}
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              No capsules found
             </h3>
-            <p className="text-gray-500 mb-8 max-w-md mx-auto">
-              {searchTerm
-                ? 'Try adjusting your search terms or filters'
-                : 'Create your first time capsule to start preserving memories for the future'}
+            <p className="text-gray-500 mb-4">
+              Start by creating a new capsule to store your memories.
             </p>
-            {!searchTerm && (
-              <Link to="/create">
-                <Button variant="primary">
-                  <Plus className="w-5 h-5 mr-2" />
-                  Create Your First Capsule
-                </Button>
-              </Link>
-            )}
+            <Link to="/create">
+              <Button>Create Capsule</Button>
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -236,11 +186,6 @@ export const MyCapsules = () => {
                 unlockDate={capsule.unlockDate}
                 createdAt={capsule.createdAt}
                 onOpen={() => handleOpenCapsule(capsule.id)}
-                onShare={
-                  capsule.visibility === 'shareable'
-                    ? () => handleShareCapsule(capsule.id)
-                    : undefined
-                }
               />
             ))}
           </div>

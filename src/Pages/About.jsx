@@ -15,27 +15,23 @@ import { Button } from '../components/Button';
 
 export const About = () => {
   const features = [
-    {
-      icon: <MessageCircle className="w-8 h-8" />,
-      title: 'Preserve Memories',
-      description: 'Write heartfelt messages, attach photos and videos, and capture moments that matter to you.',
-    },
-    {
-      icon: <Calendar className="w-8 h-8" />,
-      title: 'Time-Based Unlocking',
-      description: 'Set specific dates for your capsules to unlock, creating anticipation and meaningful reveals.',
-    },
-    {
-      icon: <Shield className="w-8 h-8" />,
-      title: 'Privacy Control',
-      description: 'Choose who can see your capsules - keep them private, make them public, or share with specific people.',
-    },
-    {
-      icon: <Users className="w-8 h-8" />,
-      title: 'Share with Others',
-      description: 'Create shareable links to send capsules to friends, family, or your future self.',
-    },
-  ];
+  {
+    icon: <MessageCircle className="w-8 h-8" />,
+    title: 'Preserve Memories',
+    description: 'Write heartfelt messages, attach photos and videos, and capture moments that matter to you.',
+  },
+  {
+    icon: <Calendar className="w-8 h-8" />,
+    title: 'Time-Based Unlocking',
+    description: 'Set specific dates for your capsules to unlock, creating anticipation and meaningful reveals.',
+  },
+  {
+    icon: <Shield className="w-8 h-8" />,
+    title: 'Privacy Control',
+    description: 'Capsules remain completely private until the unlock date.',
+  }
+];
+
 
   const steps = [
     {
@@ -71,11 +67,6 @@ export const About = () => {
       description: 'Set resolutions and check your progress later',
       icon: <Target className="w-6 h-6" />,
     },
-    {
-      title: 'Family Memories',
-      description: 'Share stories across generations',
-      icon: <Users className="w-6 h-6" />,
-    },
   ];
 
   return (
@@ -108,7 +99,7 @@ export const About = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
             {steps.map((step, index) => (
               <div key={index} className="text-center">
                 <div className="relative mb-8">
@@ -139,7 +130,7 @@ export const About = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
             {features.map((feature, index) => (
               <div
                 key={index}
@@ -168,7 +159,7 @@ export const About = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
             {useCases.map((useCase, index) => (
               <div
                 key={index}
@@ -191,7 +182,7 @@ export const About = () => {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-gray-800 mb-6">Start Your Journey Through Time</h2>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Begin preserving your memories today. Your future self will thank you for capturing these moments.
+            Begin preserving your memories today. Your future self will thank you for those moments.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/create">

@@ -18,7 +18,7 @@ export const Home = () => {
     {
       icon: <Shield className="w-8 h-8" />,
       title: 'Privacy Control',
-      description: 'Keep capsules private, make them public, or create shareable links for specific people.'
+      description: 'Capsules remain completely private until the unlock date.'
     }
   ];
 
