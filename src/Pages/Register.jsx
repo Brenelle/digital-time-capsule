@@ -17,7 +17,7 @@ const Register = () => {
 
   const navigate = useNavigate();
 
-  onst[isLoading, setIsLoading] = useState(false);
+  const[isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async (e) => {
     e.preventDefault();
