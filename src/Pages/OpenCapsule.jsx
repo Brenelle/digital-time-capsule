@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Calendar, Lock, Unlock, Heart, MessageCircle, Clock, Download } from 'lucide-react';
 import { Button } from '../components/Button';
-import ApiService from '../services/api';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../Firebase'; 
 
 export const OpenCapsule = () => {
   const { id } = useParams();
@@ -23,8 +24,15 @@ export const OpenCapsule = () => {
       setError('');
 
       try {
-        const data = await ApiService.getCapsule(id);
-        setCapsule(data);
+        const capsuleRef = doc(db, 'capsules', id);
+        const docSnap = await getDoc(capsuleRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setCapsule({ id: docSnap.id, ...data });
+        } else {
+          throw new Error('Capsule not found');
+        }
       } catch (error) {
         console.error('Error fetching capsule:', error);
         setError(error.message || 'Failed to load time capsule');
@@ -104,22 +112,7 @@ export const OpenCapsule = () => {
     );
   }
 
-  if (!capsule) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-4">
-          <div className="p-4 bg-red-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-            <MessageCircle className="w-8 h-8 text-red-600" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Capsule Not Found</h1>
-          <p className="text-gray-600 mb-6">
-            The time capsule you're looking for doesn't exist or may have been removed.
-          </p>
-          <Button variant="primary" onClick={() => window.history.back()}>Go Back</Button>
-        </div>
-      </div>
-    );
-  }
+  if (!capsule) return null;
 
   if (!capsule.isUnlocked) {
     return (
@@ -186,8 +179,16 @@ export const OpenCapsule = () => {
                 <MessageCircle className="w-8 h-8 text-purple-500 mb-4" />
                 <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">{capsule.message}</div>
               </div>
-
             </div>
+
+            {capsule.mediaUrl && (
+              <div className="mt-8 text-center">
+                <Button variant="primary" onClick={handleDownload}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Attachment
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>

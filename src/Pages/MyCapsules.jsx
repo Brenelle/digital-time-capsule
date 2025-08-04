@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, Calendar, Clock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CapsuleCard from '../components/CapsuleCard';
 import { Button } from '../components/Button';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -9,7 +9,9 @@ import {
   getDocs,
   limit,
   query,
-  where
+  where,
+  deleteDoc,
+  doc
 } from 'firebase/firestore';
 import { auth, db } from '../Firebase';
 import { toast, Toaster } from 'sonner';
@@ -21,6 +23,29 @@ export const MyCapsules = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [error, setError] = useState('');
   const [stats, setStats] = useState({ total: 0, unlocked: 0, locked: 0 });
+  const [deleteModal, setDeleteModal] = useState({ open: false, capsuleId: null, capsuleTitle: '' });
+  const navigate = useNavigate();
+
+  const openDeleteModal = (id, title) => {
+    setDeleteModal({ open: true, capsuleId: id, capsuleTitle: title });
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModal({ open: false, capsuleId: null, capsuleTitle: '' });
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await deleteDoc(doc(db, 'capsules', deleteModal.capsuleId));
+      setCapsules(prev => prev.filter(capsule => capsule.id !== deleteModal.capsuleId));
+      toast.success('Capsule deleted');
+    } catch (error) {
+      console.error('Error deleting capsule:', error);
+      toast.error('Failed to delete capsule');
+    } finally {
+      closeDeleteModal();
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -52,25 +77,26 @@ export const MyCapsules = () => {
 
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-
-        if (data.isUnlocked) unlocked++;
-        else locked++;
-
         let parsedDate = '';
+
         try {
           if (data.unlockDate?.seconds) {
             parsedDate = new Date(data.unlockDate.seconds * 1000).toISOString();
-          } else {
-            parsedDate = '';
           }
         } catch {
           parsedDate = '';
         }
 
+        const isNowUnlocked = parsedDate && new Date(parsedDate) <= new Date();
+
+        if (isNowUnlocked) unlocked++;
+        else locked++;
+
         capsulesData.push({
           id: doc.id,
           ...data,
           unlockDate: parsedDate,
+          isUnlocked: isNowUnlocked
         });
       });
 
@@ -99,7 +125,7 @@ export const MyCapsules = () => {
   });
 
   const handleOpenCapsule = (capsuleId) => {
-    window.location.href = `/capsule/${capsuleId}`;
+    navigate(`/capsule/${capsuleId}`);
   };
 
   return (
@@ -182,15 +208,43 @@ export const MyCapsules = () => {
                 id={capsule.id}
                 title={capsule.title}
                 message={capsule.message}
-                isUnlocked={capsule.isUnlocked}
                 unlockDate={capsule.unlockDate}
+                isUnlocked={capsule.isUnlocked}
+                visibility={capsule.visibility}
                 createdAt={capsule.createdAt}
                 onOpen={() => handleOpenCapsule(capsule.id)}
+                onDelete={() => openDeleteModal(capsule.id, capsule.title)}
               />
             ))}
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Delete Capsule</h2>
+            <p className="text-gray-600 mb-4">
+              Are you sure you want to delete <strong>{deleteModal.capsuleTitle}</strong>? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                onClick={closeDeleteModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                onClick={confirmDelete}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

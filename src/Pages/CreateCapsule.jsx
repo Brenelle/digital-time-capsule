@@ -40,13 +40,12 @@ export const CreateCapsule = () => {
       const user = auth.currentUser;
       if (!user) throw new Error('You must be logged in to create a capsule.');
 
-      const unlockDateTime = new Date(`${formData.unlockDate}T${formData.unlockTime}`);
-
       await addDoc(collection(db, 'capsules'), {
         userId: user.uid,
         title: formData.title,
         message: formData.message,
-        unlockDate: unlockDateTime,
+        unlockDate: formData.unlockDate,
+        unlockTime: formData.unlockTime,
         createdAt: serverTimestamp(),
         isUnlocked: false,
       });
@@ -112,9 +111,8 @@ export const CreateCapsule = () => {
               name="title"
               value={formData.title}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3 border ${
-                errors.title ? 'border-red-400' : 'border-purple-200'
-              } rounded-lg focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200`}
+              className={`w-full px-4 py-3 border ${errors.title ? 'border-red-400' : 'border-purple-200'
+                } rounded-lg focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200`}
               placeholder="Give your time capsule a meaningful title..."
             />
             {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
@@ -131,9 +129,8 @@ export const CreateCapsule = () => {
               value={formData.message}
               onChange={handleInputChange}
               rows={8}
-              className={`w-full px-4 py-3 border ${
-                errors.message ? 'border-red-400' : 'border-purple-200'
-              } rounded-lg focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 resize-none`}
+              className={`w-full px-4 py-3 border ${errors.message ? 'border-red-400' : 'border-purple-200'
+                } rounded-lg focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 resize-none`}
               placeholder="Write your message to the future..."
             />
             {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
@@ -152,9 +149,8 @@ export const CreateCapsule = () => {
               value={formData.unlockDate}
               onChange={handleInputChange}
               min={getMinDate()}
-              className={`w-full px-4 py-3 border ${
-                errors.unlockDate ? 'border-red-400' : 'border-purple-200'
-              } rounded-lg focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200`}
+              className={`w-full px-4 py-3 border ${errors.unlockDate ? 'border-red-400' : 'border-purple-200'
+                } rounded-lg focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200`}
             />
             {errors.unlockDate && <p className="text-red-500 text-sm mt-1">{errors.unlockDate}</p>}
           </div>
@@ -170,9 +166,8 @@ export const CreateCapsule = () => {
               name="unlockTime"
               value={formData.unlockTime}
               onChange={handleInputChange}
-              className={`w-full px-4 py-3 border ${
-                errors.unlockTime ? 'border-red-400' : 'border-purple-200'
-              } rounded-lg focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200`}
+              className={`w-full px-4 py-3 border ${errors.unlockTime ? 'border-red-400' : 'border-purple-200'
+                } rounded-lg focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200`}
             />
             {errors.unlockTime && <p className="text-red-500 text-sm mt-1">{errors.unlockTime}</p>}
           </div>

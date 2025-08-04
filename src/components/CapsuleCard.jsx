@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Lock, Unlock, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { Calendar, Lock, Unlock, Eye, EyeOff, ExternalLink, Trash2 } from 'lucide-react';
 import { Button } from './Button';
 
 const CapsuleCard = ({
@@ -12,13 +12,12 @@ const CapsuleCard = ({
   createdAt,
   onOpen,
   onShare,
+  onDelete,
 }) => {
   const formatDate = (dateInput) => {
     if (!dateInput) return 'Invalid Date';
 
     let date;
-
-    // If Firestore Timestamp (has toDate method)
     if (typeof dateInput.toDate === 'function') {
       date = dateInput.toDate();
     } else {
@@ -94,7 +93,9 @@ const CapsuleCard = ({
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-xs text-gray-400">Created {formatDate(createdAt)}</span>
+          <span className="text-xs text-gray-400">
+            Created {createdAt ? formatDate(createdAt) : 'Unknown'}
+          </span>
           <div className="flex space-x-2">
             {visibility === 'shareable' && onShare && (
               <Button variant="outline" size="sm" onClick={onShare}>
@@ -109,6 +110,18 @@ const CapsuleCard = ({
             >
               {canOpen ? 'Open' : 'Locked'}
             </Button>
+            {onDelete && (
+              <Button
+                variant="destructive"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevents card click event if wrapped
+                  onDelete();
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </div>
       </div>

@@ -17,24 +17,32 @@ const Register = () => {
 
   const navigate = useNavigate();
 
+  onst[isLoading, setIsLoading] = useState(false);
+
   const handleRegister = async (e) => {
     e.preventDefault();
     setFirebaseError('');
     setSuccessMessage('');
+    setIsLoading(true);
 
     setEmailTouched(true);
     setPasswordTouched(true);
     setConfirmTouched(true);
 
-    if (!email || !password || !confirm) return;
+    if (!email || !password || !confirm) {
+      setIsLoading(false);
+      return;
+    }
 
     if (password.length < 8) {
       setFirebaseError('Password must be at least 8 characters');
+      setIsLoading(false);
       return;
     }
 
     if (password !== confirm) {
       setFirebaseError('Passwords do not match');
+      setIsLoading(false);
       return;
     }
 
@@ -52,8 +60,11 @@ const Register = () => {
       } else {
         setFirebaseError(err.message);
       }
+    } finally {
+      setIsLoading(false);
     }
   };
+
 
   const inputErrorClass = 'border-red-500';
   const baseInputClass =
@@ -126,9 +137,13 @@ const Register = () => {
 
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition duration-300"
+            disabled={isLoading}
+            className={`w-full py-2 rounded-md transition duration-300 ${isLoading
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+              }`}
           >
-            Sign Up
+            {isLoading ? 'Registering...' : 'Sign Up'}
           </button>
         </form>
 
