@@ -115,7 +115,7 @@ const CapsuleCard = ({
                 variant="destructive"
                 size="icon"
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevents card click event if wrapped
+                  e.stopPropagation();
                   onDelete();
                 }}
               >
