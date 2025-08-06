@@ -1,12 +1,52 @@
-# React + Vite
+#  Digital Time Capsule
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The **Digital Time Capsule** is a modern web application that allows users to create and store personal messages and memories to be unlocked at a future date. This project brings the nostalgic idea of a time capsule into the digital age.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## Expanding the ESLint configuration
+-  Create a capsule with a title, message
+-  Set a future unlock **date and time**.
+-  Capsules stay locked until the unlock time.
+-  Storage using Firebase Storage.
+-  Clean user interface with React + Tailwind CSS.
+-  Secure authentication using Firebase Auth.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## Work In Progress
+
+>  **Automatic unlocking logic based on the unlock date/time is not yet implemented.**  
+Capsules are currently not unlocked.
+
+Upcoming features:
+-  Background unlock system using Firebase Cloud Functions
+-  Email/WhatsApp delivery on unlock
+-  Support for media formats
+-  Capsule timeline view
+
+---
+
+##  Built With
+
+- **Frontend**: React, Tailwind CSS, Lucide Icons
+- **Backend**: Firebase (Firestore, Storage, Authentication)
+- **Deployment**: Netlify
+
+---
+
+##  Setup Instructions
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/digital-time-capsule.git cd digital-time-capsule
+
+---
+
+## Contribution
+
+Contributions are welcome!
+Please open an issue or pull request for any bugs, features, or improvements.
+
+
