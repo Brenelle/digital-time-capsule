@@ -2,7 +2,7 @@
 
 The **Digital Time Capsule** is a modern web application that allows users to create and store personal messages and memories to be unlocked at a future date. This project brings the nostalgic idea of a time capsule into the digital age.
 
----
+
 
 ## Features
 
@@ -13,7 +13,7 @@ The **Digital Time Capsule** is a modern web application that allows users to cr
 -  Clean user interface with React + Tailwind CSS.
 -  Secure authentication using Firebase Auth.
 
----
+
 
 ## Work In Progress
 
@@ -26,7 +26,7 @@ Upcoming features:
 -  Support for media formats
 -  Capsule timeline view
 
----
+
 
 ##  Built With
 
@@ -34,7 +34,7 @@ Upcoming features:
 - **Backend**: Firebase (Firestore, Storage, Authentication)
 - **Deployment**: Netlify
 
----
+
 
 ##  Setup Instructions
 
@@ -42,7 +42,7 @@ Upcoming features:
    ```bash
    git clone https://github.com/yourusername/digital-time-capsule.git cd digital-time-capsule
 
----
+
 
 ## Contribution
 
